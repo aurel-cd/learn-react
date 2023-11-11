@@ -1,29 +1,43 @@
-const DUMMY_DATA = [
-  {
-    id: "m1",
-    title: "This is a first meetup",
-    image: "",
-    address: "MetupStreet 5, 12345 Meetup City",
-    description: "Amazing first meetup",
-  },
-  {
-    id: "m2",
-    title: "This is a second meetup",
-    image: "",
-    address: "MetupStreet 5, 12345 Meetup City",
-    description: "Amazing first meetup",
-  },
-];
+import { useState, useEffect } from "react";
+
+import MeetupList from "../components/meetups/MeetupList";
 
 function AllMeetupsPage() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadedMeetups, setLoadedMeetups] = useState([]);
+
+  useEffect(() => {
+    fetch("https://learn-react-e75ef-default-rtdb.firebaseio.com/meetups.json")
+      .then((response) => {
+        return response.json();
+      })
+      .then((data) => {
+        const meetups = [];
+
+        for(const key in data){
+          const meetup ={
+            id: key, 
+            ...data[key]
+          }
+          meetups.push(meetup);
+        }
+        setIsLoading(false);
+        setLoadedMeetups(meetups);
+      });
+  }, []);
+
+  if (isLoading) {
+    return (
+      <section>
+        <p>Loading...</p>
+      </section>
+    );
+  }
+
   return (
     <section>
       <h1>All Meetups</h1>
-      <ul>
-        {DUMMY_DATA.map((meetup) => {
-          return <li key={meetup.id}> {meetup.title} </li>;
-        })}
-      </ul>
+      <MeetupList meetups={loadedMeetups} />
     </section>
   );
 }
